@@ -1,11 +1,17 @@
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { Button, FlatList, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-
+import { Button, FlatList, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import GoalItem from './components/GoalItem';
 export default function App() {
-
+  const [modalVisible,setModalVisible]=useState(false);
   const[enteredGoalText,setEnteredGoalText]=useState("");
   const[courseGoals,setCourseGoals]=useState([]);
+  function startAddGoal(){
+    setModalVisible(true);
+  }
+  function endAddGoal(){
+    setModalVisible(false);
+  }
   function goalInputHandler(enteredText){
       setEnteredGoalText(enteredText);
   }
@@ -13,25 +19,48 @@ export default function App() {
       setCourseGoals(currentCourseGoals=>[
         ...currentCourseGoals,
         { text:enteredGoalText , id: Math.random().toString()},
-      ]);
+      ]
+      );
+      setEnteredGoalText('');
+      endAddGoal();
+  }
+  function deleteGoalHandler(){
+    setCourseGoals(currentCourseGoals=>{
+      
+      return currentCourseGoals.filter((goal)=>goal.id !== id);
+    });
   }
  
   return (
     <View style={styles.container}>
+      <Button title='add new goal' onPress={startAddGoal} />
+      <Modal visible={modalVisible} animationType='slide'>
       <View style={styles.inputcontainer} >
-        <TextInput style={styles.textinput}placeholder="enter your todo's" onChangeText={goalInputHandler}></TextInput>
-        <Button title="add todo" onPress={addGoalHandler}></Button>
+        <TextInput style={styles.textinput}
+        placeholder="enter your todo's" 
+        onChangeText={goalInputHandler}
+        value={enteredGoalText}></TextInput>
+        <View style={styles.Buttoncontainer}>
+          <View style={styles.Button}>
+           <Button title="add todo" onPress={addGoalHandler}></Button>
+        </View>
+        <View style={styles.Button}>
+          <Button title="cancle" onPress={endAddGoal}></Button>
+      </View></View>
       </View>
+
+      </Modal>
       <View style={styles.list}>
          <Text style={styles.title}>LIST OF ALL TODO'S</Text>
         <FlatList
         data={courseGoals}
         renderItem={(itemData)=>{
-          return(
+          id = itemData.item.id ;
+          return ( 
             <View>
-              <Text style={styles.act}>{itemData.item.text}</Text>
-            </View>
-          );
+          <Pressable android_ripple={{color:'darkgrey'}} onPress={deleteGoalHandler}><View >
+            <Text style={styles.act}>{itemData.item.text}</Text>
+          </View></Pressable></View>);
         }}
         keyExtractor={(item,index)=>{
           return item.id;
@@ -41,6 +70,7 @@ export default function App() {
         />
       
       </View>
+     
     </View>
   );
 }
@@ -51,6 +81,19 @@ const styles = StyleSheet.create({
     color:'dodgerblue',
     fontFamily:'serif'
   },
+  Buttoncontainer:{
+    margin:10,
+    flexDirection:'row',
+   
+    
+  },
+  Button:{
+    margin:8,
+    
+    
+   
+    
+  },
   act:{
     fontSize:20,
     color:'darkblue',
@@ -60,6 +103,7 @@ const styles = StyleSheet.create({
     backgroundColor:'skyblue',
 
   },
+  
   container: {
     flex:1,
     backgroundColor: '#fff',
@@ -68,12 +112,14 @@ const styles = StyleSheet.create({
   },
   inputcontainer:{
     flex:1,
-    flexDirection:'row',
-    justifyContent:'space-between',
+    flexDirection:'column',
+    justifyContent:'center',
     alignItems:'center',
     paddingBottom:25,
     borderBottomWidth:1,
-    borderBottomColor:'grey'
+    borderBottomColor:'grey',
+    
+    margin:15
   },
   list:{
     flex:3,
@@ -84,7 +130,7 @@ const styles = StyleSheet.create({
     borderColor:'grey',
     padding:10,
     width:'75%',
-    marginRight:10,
+    borderRadius:10,
     padding:10
 
   }
